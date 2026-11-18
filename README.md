@@ -135,7 +135,4 @@ The benchmark figures shown in the research materials describe the Ohio test coh
 - Model JSON files are runtime artifacts. The backend loads the Ohio family and the SimGlucose family from separate directories; restart the backend after replacing model files so it reloads the weights.
 - Synthetic frontend demo data is only a fallback for demonstrating the interface.
 
-More backend-specific request examples and configuration notes are in [backend/README.md](backend/README.md).
-# T1DM
-#   T 1 D M  
- 
+More backend-specific request examples and configuration notes are in [backend/README.md](backend/README.md). 
