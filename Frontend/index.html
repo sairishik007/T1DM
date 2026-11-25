@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Glucose Horizon — CGM-Only Blood Glucose Forecasting</title>
+  <title>Glucose Care — Your glucose, made clearer</title>
+  <meta name="theme-color" content="#f4f8fa">
+  <meta name="description" content="Understand your glucose history and research forecasts with a clear, accessible Type 1 diabetes dashboard.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.453.0/dist/umd/lucide.min.js"></script>
 </head>
-<body>
+<body class="patient-view">
   <canvas class="cursor-dots" id="cursorDots" aria-hidden="true"></canvas>
   <!-- Mobile top bar -->
   <header class="mobile-bar" role="banner">
@@ -19,8 +21,8 @@
       <i data-lucide="menu"></i>
     </button>
     <div class="brand brand--compact">
-      <i data-lucide="activity" aria-hidden="true"></i>
-      <span>GLUCOSE HORIZON</span>
+      <i data-lucide="heart-pulse" aria-hidden="true"></i>
+      <span class="brand-lockup"><strong>glucose<span class="brand-highlight">care</span></strong><small>GLUCOSE INSIGHTS</small></span>
     </div>
     <span class="demo-badge" id="demoBadgeMobile" hidden>Demo data</span>
   </header>
@@ -29,69 +31,94 @@
 
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="brand">
-      <i data-lucide="activity" aria-hidden="true"></i>
-      <span>GLUCOSE HORIZON</span>
+      <i data-lucide="heart-pulse" aria-hidden="true"></i>
+      <span class="brand-lockup"><strong>glucose<span class="brand-highlight">care</span></strong><small>GLUCOSE INSIGHTS</small></span>
     </div>
 
     <nav id="nav" aria-label="Views">
       <button type="button" data-view="overview" class="active" aria-current="page">
-        <i data-lucide="layout-dashboard" aria-hidden="true"></i>Overview
+        <i data-lucide="layout-dashboard" aria-hidden="true"></i>My Glucose
       </button>
       <button type="button" data-view="forecast">
         <i data-lucide="chart-line" aria-hidden="true"></i>Glucose Forecast
       </button>
       <button type="button" data-view="explorer">
-        <i data-lucide="flask-conical" aria-hidden="true"></i>Test Explorer
+        <i data-lucide="flask-conical" aria-hidden="true"></i>Test Examples
       </button>
       <button type="button" data-view="clinical">
-        <i data-lucide="stethoscope" aria-hidden="true"></i>Clinical Analysis
+        <i data-lucide="stethoscope" aria-hidden="true"></i>Clinical Details
       </button>
       <button type="button" data-view="performance">
-        <i data-lucide="gauge" aria-hidden="true"></i>Performance
+        <i data-lucide="gauge" aria-hidden="true"></i>Accuracy Details
       </button>
       <button type="button" data-view="model">
-        <i data-lucide="network" aria-hidden="true"></i>Model
+        <i data-lucide="network" aria-hidden="true"></i>How It Works
       </button>
       <button type="button" data-view="upload">
-        <i data-lucide="upload" aria-hidden="true"></i>Upload CGM Data
+        <i data-lucide="upload" aria-hidden="true"></i>Upload Readings
       </button>
       <button type="button" data-view="agent">
-        <i data-lucide="bot" aria-hidden="true"></i>Forecast Agent
+        <i data-lucide="bot" aria-hidden="true"></i>Ask for Help
       </button>
     </nav>
 
+    <fieldset class="accessibility-tools" aria-label="Adjust reading size">
+      <legend>Reading size</legend>
+      <div class="text-size-actions" role="group" aria-label="Text size">
+        <label><input type="radio" name="reading-size" id="fontComfort" checked><span>Standard</span></label>
+        <label><input type="radio" name="reading-size" id="fontLarge"><span>Large</span></label>
+        <label><input type="radio" name="reading-size" id="fontXL"><span>Extra large</span></label>
+      </div>
+      <p class="setting-hint">Changes text size on this page.</p>
+    </fieldset>
     <div class="picker">
-      <label class="patient-mode-toggle"><input type="checkbox" id="patientViewToggle"><span>Patient View</span></label>
+      <label class="patient-mode-toggle"><input type="checkbox" id="patientViewToggle" checked aria-describedby="simpleViewHelp"><span>Simple view</span></label>
+      <p id="simpleViewHelp" class="setting-hint">On by default. Turn off for research and clinical pages.</p>
       <span class="demo-badge" id="demoBadge" hidden>Demo data</span>
       <div class="api-status" id="apiStatus" role="status" aria-live="polite"></div>
     </div>
   </aside>
 
   <div class="shell">
+    <div class="workspace-bar" aria-label="Workspace information">
+      <span class="workspace-label"><i data-lucide="shield-check" aria-hidden="true"></i> Your glucose workspace</span>
+      <span class="workspace-status"><span class="status-pulse" aria-hidden="true"></span> Research preview · Not a medical device</span>
+    </div>
     <main id="main">
       <!-- 1. Overview -->
       <section id="v-overview" class="view active" aria-labelledby="overview-title">
         <header class="view-header">
-          <h1 id="overview-title">CGM-Only Blood Glucose Forecasting</h1>
-          <p id="overviewDescription">Upload a patient’s CGM CSV to populate the glucose history, forecast, and analysis views with that patient’s data.</p>
+          <span class="eyebrow"><i data-lucide="sparkles" aria-hidden="true"></i> YOUR PERSONAL DASHBOARD</span>
+          <h1 id="overview-title">Understand your glucose <em>at a glance.</em></h1>
+          <p id="overviewDescription">Understand your recent readings and explore glucose forecasts, in one calm, easy-to-use space.</p>
         </header>
 
-        <div class="grid4" id="summary"></div>
+        <div class="care-intro" role="note">
+          <i data-lucide="heart-handshake" aria-hidden="true"></i>
+          <div><strong>Welcome to your care workspace</strong><p>Start with your glucose summary, upload CGM readings, or explore an easy-to-read forecast. You are in control of what you see.</p></div>
+        </div>
+        <div class="care-help" role="note">
+          <i data-lucide="info" aria-hidden="true"></i>
+          <span>Example readings may be shown until you upload a CGM CSV. Always check the <strong>Demo data</strong> label before interpreting results.</span>
+        </div>
+        <div class="grid4" id="summary" aria-label="Glucose summary"></div>
 
         <div class="card" id="overviewTrajectoryCard">
-          <h2>Actual vs predicted trajectory</h2>
+          <h2>Your glucose trend</h2>
+          <p class="muted">Review the glucose trend and model estimates. Predictions are not confirmed CGM measurements; use the chart legend to distinguish them.</p>
           <div class="chart"><canvas id="cMain" aria-label="Actual versus predicted glucose trajectory chart"></canvas></div>
         </div>
 
         <div class="card overview-agent-cta">
-          <div><h2>Need help understanding your forecast?</h2><p class="muted">Ask the Forecast Agent for patient-specific tips and safe next steps.</p></div>
-          <button type="button" class="btn primary" id="overviewAgentBtn"><i data-lucide="bot" aria-hidden="true"></i><span>Get tips from your Forecast Agent</span></button>
+          <div><h2>Questions about your readings?</h2><p class="muted">Ask for a simple explanation of your glucose forecast. This is not medical advice.</p></div>
+          <button type="button" class="btn primary" id="overviewAgentBtn"><i data-lucide="bot" aria-hidden="true"></i><span>Explain my forecast</span></button>
         </div>
 
         <div class="grid4" id="fcards"></div>
 
         <div class="card">
-          <h2>Forecast Risk &amp; Alerts</h2>
+          <h2>Glucose range and alerts</h2>
+          <p class="muted">These are estimated risks based on model output, not live medical alarms.</p>
           <div class="grid4" id="riskSummary"></div>
           <div class="risk-strip" id="riskTrajectory" aria-label="Glucose zone risk across horizons"></div>
           <div class="alert-banner" id="riskAlert" role="status"></div>
@@ -339,49 +366,55 @@
       <!-- 7. User data upload -->
       <section id="v-upload" class="view" aria-labelledby="upload-title" hidden>
         <header class="view-header">
-          <h1 id="upload-title">Upload CGM History</h1>
-          <p>Choose the prediction model that matches the columns in your CSV. The upload is used for prediction only.</p>
+          <h1 id="upload-title">Upload your glucose readings</h1>
+          <p>Upload a CSV exported from your continuous glucose monitor (CGM) to see your readings and estimated future glucose.</p>
         </header>
 
+        <div class="upload-steps" aria-label="How to upload your readings">
+          <div><span class="step-number">1</span><strong>Export</strong><p>Download a CSV file from your CGM app or device portal.</p></div>
+          <div><span class="step-number">2</span><strong>Choose</strong><p>Select the CSV file saved on your device.</p></div>
+          <div><span class="step-number">3</span><strong>Predict</strong><p>Press “Show my forecast” to view the results.</p></div>
+        </div>
+        <div class="care-help"><i data-lucide="info" aria-hidden="true"></i><span>Use a CSV containing <strong>timestamp</strong> and <strong>glucose (mg/dL)</strong> columns, with at least 25 consecutive readings approximately 5 minutes apart. Additional insulin/meal columns are optional only for the corresponding model.</span></div>
         <div class="card upload-controls">
           <div class="file-picker">
             <input type="file" id="uploadCsv" accept=".csv,text/csv" aria-label="Choose CGM history CSV" hidden>
             <div class="file-picker-copy">
-              <span class="file-picker-title">Your glucose history</span>
+              <span class="file-picker-title">Step 2 · Select your file</span>
               <strong id="uploadFileName" aria-live="polite">No file selected</strong>
-              <span class="muted">Select a CSV file from your device</span>
+              <span class="muted">CSV files only. Your selected filename will appear above.</span>
             </div>
             <button type="button" class="btn primary choose-csv" id="chooseCsv">
-              <i data-lucide="file-up" aria-hidden="true"></i><span>Choose CSV file</span>
+              <i data-lucide="file-up" aria-hidden="true"></i><span>Choose my CSV file</span>
             </button>
           </div>
           <div class="upload-parameters">
-            <label>Prediction model
+            <label>What does your CSV contain?
               <select id="uploadMode" aria-label="Choose a prediction model">
-                <option value="cgm">CGM only · Ohio-trained models</option>
-                <option value="multimodal">CGM + insulin + optional meal · SimGlucose models</option>
+                <option value="cgm">Glucose readings only (recommended for CGM-only files)</option>
+                <option value="multimodal">Glucose + insulin + optional meals (simulated-model option)</option>
               </select>
             </label>
-            <label>Forecast horizon
+            <label>How far ahead?
               <select id="uploadHorizon" aria-label="Choose forecast horizon">
                 <option value="all">All horizons</option>
               </select>
             </label>
             <button type="button" class="btn primary upload-submit" id="uploadRun">
-              <i data-lucide="upload" aria-hidden="true"></i><span>Upload &amp; Predict</span>
+              <i data-lucide="chart-line" aria-hidden="true"></i><span>Show my forecast</span>
             </button>
           </div>
         </div>
 
-        <p class="muted" id="uploadHelp">CSV needs timestamp and glucose (mg/dL), with at least 25 sequential readings at roughly 5-minute intervals.</p>
+        <p class="muted" id="uploadHelp" role="status" aria-live="polite">CSV needs timestamp and glucose (mg/dL), with at least 25 sequential readings at roughly 5-minute intervals.</p>
         <div class="grid4" id="uploadResults" aria-live="polite"></div>
         <div class="card upload-agent-review">
           <div>
-            <h2>Personal tips from the Forecast Agent</h2>
-            <p class="muted">After a prediction, ask for meal ideas and activity suggestions based on this patient’s glucose history and forecast.</p>
+            <h2>Understand your results</h2>
+            <p class="muted">After a prediction, ask for a plain-language explanation. Confirm healthcare decisions with your own care team.</p>
           </div>
           <button type="button" class="btn" id="askCsvAgent" disabled>
-            <i data-lucide="bot" aria-hidden="true"></i><span>Get meal and activity tips</span>
+            <i data-lucide="bot" aria-hidden="true"></i><span>Explain my results</span>
           </button>
         </div>
         <div class="card" id="uploadPredictionModelsCard">
@@ -395,8 +428,8 @@
       <!-- 8. Groq Forecast Agent -->
       <section id="v-agent" class="view" aria-labelledby="agent-title" hidden>
         <header class="view-header">
-          <h1 id="agent-title">T1D Forecasting &amp; Wellness Agent</h1>
-          <p>Powered by Groq and <code>openai/gpt-oss-120b</code>, the assistant answers questions about your glucose forecast using calibrated XGBoost models. It can also suggest balanced meals, workout routines, and immediate steps for hypo- and hyperglycemia.</p>
+          <h1 id="agent-title">Ask about your glucose</h1>
+          <p>Powered by Groq and <code>openai/gpt-oss-120b</code>, the assistant answers questions about your glucose forecast using calibrated XGBoost models. Responses are informational and should not replace your clinician’s advice or personal diabetes care plan.</p>
         </header>
 
         <div class="agent-layout">
@@ -489,7 +522,7 @@
                   id="agentInput"
                   class="agent-input"
                   rows="1"
-                  placeholder="Ask about your glucose forecast, meal ideas, workout routines, or immediate hypo/hyper triage..."
+                  placeholder="Type your question here…" aria-label="Ask a question about your glucose forecast"
                   autocomplete="off"
                   required
                 ></textarea>
@@ -505,10 +538,12 @@
         </div>
       </section>
     </main>
+    <div class="care-footer-note" role="note"><strong>Glucose Care · Research prototype</strong><span>For information only. Forecasts can be wrong and should not be used for insulin doses or emergency decisions. Follow your established diabetes care plan.</span></div>
   </div>
 
   <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
   <script src="script.js"></script>
+
 </body>
 </html>
